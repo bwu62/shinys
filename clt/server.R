@@ -8,9 +8,9 @@ shinyServer(function(input,output) {
 		
 		output$distPlot <- renderPlot(height=input$dimension[1],width=input$dimension[2],{
 			
-			size = c(1,2,3,4,5,6,7,8,9,10,12,14,16,18,20,22,24,26,28,30,35,40,45,50,60,70,80,90,100,150,200,250,300,350,400,600,800,1000,2000,5000,10000)[input$size+1]
+			size = c(1,2,3,4,5,6,7,8,9,10,12,14,16,18,20,22,24,26,28,30,35,40,45,50,60,70,80,90,100,150,200,250,300,350,400,600,800,1000)[input$size+1]
 			type = input$dist
-			S    = 10000
+			S    = 1000
 			means = rep(NA,S)
 			
 			switch(type,
