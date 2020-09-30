@@ -49,7 +49,7 @@ shinyServer(function(input, output) {
                                              "Approximate trend",
                                              "Attenuation curve")) +
                 theme(legend.justification = c(1, 1), legend.position = c(.98, .98)) +
-                labs(x="Index",y="Relative intensity",title="Fourier transformed spectrum + attenuation curve")
+                labs(x="Frequency index",y="Relative intensity",title="Fourier transformed spectrum + attenuation curve")
         })
         
         # plot original spectrum
@@ -57,12 +57,15 @@ shinyServer(function(input, output) {
             switch(input$scale,
                    linear={
                        ggplot(cb58,aes(x=LOGLAM,y=FLUX)) + geom_line() + 
-                           scale_y_continuous() + ylab("Flux") + xlab("Log(Wavelength)")
+                           scale_y_continuous() + 
+                           labs(x="Log(Wavelength)",y="Flux",
+                                title="Original spectrum")
                    },
                    log={
                        ggplot(cb58,aes(x=LOGLAM,y=FLUX)) + geom_line() + 
                            scale_y_log10(limits=c(exp(min(log(cb58$f.flt),na.rm=T)),max(cb58$f.flt))) + 
-                           ylab("Log(Flux)") + xlab("Log(Wavelength)")
+                           labs(x="Log(Wavelength)",y="Log(Flux)",
+                                title="Original spectrum")
                    })
             
             
@@ -70,12 +73,18 @@ shinyServer(function(input, output) {
         
         # plot filtered spectrum
         output$cb58flt <- renderPlot({
-            ggplot(cb58,aes(x=LOGLAM,y=f.flt)) + 
-                geom_line() + switch(input$scale,
-                                     linear={NULL},
-                                     log={scale_y_log10()})
+            switch(input$scale,
+                   linear={
+                       ggplot(cb58,aes(x=LOGLAM,y=f.flt)) + geom_line() + 
+                           labs(x="Log(Wavelength)",y="Flux",
+                                title="Filtered spectrum")
+                   },
+                   log={
+                       ggplot(cb58,aes(x=LOGLAM,y=f.flt)) + geom_line() + 
+                           scale_y_log10() + 
+                           labs(x="Log(Wavelength)",y="Log(Flux)",
+                                title="Filtered spectrum")
+                   })
         })
-        
-        
     })
 })
