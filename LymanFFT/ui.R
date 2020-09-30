@@ -2,26 +2,29 @@ library(shiny)
 
 # Define UI for application that draws a histogram
 shinyUI(fluidPage(
-
-    titlePanel("Lyman FFT low-pass smoothing"),
-
+    
+    titlePanel("Lyman FFT low-pass smoothing (cB58)"),
+    
     sidebarLayout(
         sidebarPanel(
             tags$head(tags$style("#freq{height:29vh !important;}
                                  #cb58{height:29vh !important;margin-top:2vh !important;}
                                  #cb58flt{height:29vh !important;margin-top:2vh !important}")),
+            selectInput("filepath","Choose input spectrum:",
+                        c("cB58_Lyman_break.fit",list.files("data/"))),
             sliderInput("thresh",
                         "Filter threshold:",
-                        min = 0,
-                        max = 500,
+                        min   = 0,
+                        max   = 500,
                         value = 100,
-                        step=10),
+                        step  = 10),
+            
             sliderInput("strength",
                         "Attenuation strength:",
-                        min = 0.000,
-                        max = 0.05,
+                        min   = 0.000,
+                        max   = 0.05,
                         value = 0.03,
-                        step=0.001),
+                        step  = 0.001),
             radioButtons("scale",
                          "Spectra flux scale:",
                          c("linear","log"))
