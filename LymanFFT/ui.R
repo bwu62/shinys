@@ -14,7 +14,7 @@ shinyUI(fluidPage(
                                  #cb58flt{height:25vh !important;margin-top:0vh !important;}
                                  #noise{height:25vh !important;margin-top:0vh !important;}")),
             selectInput("filepath","Choose input spectrum:",
-                        c("cB58_Lyman_break.fit",list.files("data/"))),
+                        c("cB58_Lyman_break.fit (template)",list.files("data/"))),
             sliderInput("thresh",
                         "Filter threshold:",
                         min   = 0,
@@ -30,7 +30,12 @@ shinyUI(fluidPage(
                         step  = 0.001),
             radioButtons("scale",
                          "Spectra flux scale:",
-                         c("linear","log"))
+                         c("linear","log")),
+            conditionalPanel(
+                "input.filepath == 'cB58_Lyman_break.fit (template)'",
+                actionButton("save","Save template")
+            ),
+            textOutput("saved")
         ),
         mainPanel(
             fluidPage(
