@@ -7,9 +7,10 @@ shinyUI(fluidPage(
     
     sidebarLayout(
         sidebarPanel(
-            tags$head(tags$style("#freq{height:29vh !important;}
-                                 #cb58{height:29vh !important;margin-top:2vh !important;}
-                                 #cb58flt{height:29vh !important;margin-top:2vh !important}")),
+            tags$head(tags$style("#freq{height:25vh !important;}
+                                 #cb58{height:25vh !important;margin-top:2vh !important;}
+                                 #cb58flt{height:25vh !important;margin-top:2vh !important;}
+                                 #noise{height:25vh !important;margin-top:2vh !important;}")),
             selectInput("filepath","Choose input spectrum:",
                         c("cB58_Lyman_break.fit",list.files("data/"))),
             sliderInput("thresh",
@@ -23,7 +24,7 @@ shinyUI(fluidPage(
                         "Attenuation strength:",
                         min   = 0.000,
                         max   = 0.05,
-                        value = 0.03,
+                        value = 0.02,
                         step  = 0.001),
             radioButtons("scale",
                          "Spectra flux scale:",
@@ -31,9 +32,10 @@ shinyUI(fluidPage(
         ),
         mainPanel(
             fluidPage(
-                plotOutput("freq",height="30%"),
-                plotOutput("cb58",height="30%"),
-                plotOutput("cb58flt",height="30%")
+                plotOutput("freq"),
+                plotOutput("cb58"),
+                plotOutput("cb58flt"),
+                plotOutput("noise")
             )
         )
     )

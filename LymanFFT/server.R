@@ -84,14 +84,21 @@ shinyServer(function(input, output) {
                    linear={
                        ggplot(galaxy,aes(x=loglam,y=f.flt)) + geom_line() + 
                            labs(x="Log(Wavelength)",y="Flux",
-                                title="Filtered spectrum")
+                                title="Smoothed spectrum")
                    },
                    log={
                        ggplot(galaxy,aes(x=loglam,y=f.flt)) + geom_line() + 
                            scale_y_log10() + 
                            labs(x="Log(Wavelength)",y="Log(Flux)",
-                                title="Filtered spectrum")
+                                title="Smoothed spectrum")
                    })
+        })
+        
+        # plot noise spectrum
+        output$noise <- renderPlot({
+            ggplot(galaxy,aes(x=loglam,y=flux-f.flt)) + geom_line() + 
+                labs(x="Log(Wavelength)",y="Flux",
+                     title="Noise (original-smoothed)")
         })
     })
 })
