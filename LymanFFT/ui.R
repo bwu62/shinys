@@ -7,9 +7,9 @@ shinyUI(fluidPage(
 
     sidebarLayout(
         sidebarPanel(
-            tags$head(tags$style("#freq{height:30vh !important;}
-                                 #cb58{height:30vh !important;}
-                                 #cb58flt{height:30vh !important;}")),
+            tags$head(tags$style("#freq{height:29vh !important;}
+                                 #cb58{height:29vh !important;margin-top:2vh !important;}
+                                 #cb58flt{height:29vh !important;margin-top:2vh !important}")),
             sliderInput("thresh",
                         "Filter threshold:",
                         min = 0,

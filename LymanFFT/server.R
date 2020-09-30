@@ -13,6 +13,9 @@ shinyServer(function(input, output) {
     
     observeEvent(c(input$thresh,input$strength,input$scale),{
         
+        ## initialize input list for debug purposes
+        # input = list(strength=.02,thresh=100,scale="log")
+        
         # define attenuation function using double exponential
         att = Vectorize(function(x){1/(exp(exp(input$strength*(x-input$thresh))))})
         
@@ -51,12 +54,18 @@ shinyServer(function(input, output) {
         
         # plot original spectrum
         output$cb58 <- renderPlot({
-            ggplot(cb58,aes(x=LOGLAM,y=FLUX)) + 
-                geom_line() + switch(input$scale,
-                                     linear={scale_y_continuous()},
-                                     log={scale_y_log10(
-                                         limits=quantile(cb58$FLUX,probs=c(0.01,0.99),na.rm=T)
-                                     )})
+            switch(input$scale,
+                   linear={
+                       ggplot(cb58,aes(x=LOGLAM,y=FLUX)) + geom_line() + 
+                           scale_y_continuous() + ylab("Flux") + xlab("Log(Wavelength)")
+                   },
+                   log={
+                       ggplot(cb58,aes(x=LOGLAM,y=FLUX)) + geom_line() + 
+                           scale_y_log10(limits=c(exp(min(log(cb58$f.flt),na.rm=T)),max(cb58$f.flt))) + 
+                           ylab("Log(Flux)") + xlab("Log(Wavelength)")
+                   })
+            
+            
         })
         
         # plot filtered spectrum
