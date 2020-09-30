@@ -3,7 +3,7 @@ library(shiny)
 # Define UI for application that draws a histogram
 shinyUI(fluidPage(
     
-    titlePanel("Lyman FFT low-pass smoothing (cB58)"),
+    titlePanel("Lyman FFT low-pass smoothing"),
     
     sidebarLayout(
         sidebarPanel(
