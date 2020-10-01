@@ -5,8 +5,8 @@ account: bwu62
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 2914780
-bundleId: 3687657
+bundleId: 3690668
 url: https://bwu62.shinyapps.io/LymanFFT/
-when: 1601476134.42792
+when: 1601540826.60011
 asMultiple: FALSE
 asStatic: FALSE
