@@ -342,6 +342,21 @@ shinyServer(function(input, output, session) {
                         ncol=2
                     )
                 })
+                
+                
+                output$stats2 = renderTable(
+                    data.frame(
+                        vars = c("Transformed Gini:","1-|KS| :","Product:"),
+                        vals = with(conv,as.character(
+                            c(G <- round(Gini(trans),3),
+                              KS <- round(1-abs(ks.test(peakSpec.complete$f.flt,
+                                                        peakSpec.complete$tempflux*input$stretch+input$shift)$statistic),3),
+                              G*KS
+                              )
+                        ))
+                    ),
+                    spacing="xs",align="l",colnames=FALSE
+                )
             }
         } else{
             output$match.msg = renderText("Save smoothed template first!")

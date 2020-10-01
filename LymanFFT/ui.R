@@ -97,16 +97,17 @@ shinyUI(
                                 step  = 1),
                     sliderInput("stretch",
                                 "Template stretch:",
-                                min   = 0.001,
-                                max   = 10,
+                                min   = 0.0001,
+                                max   = 1000,
                                 value = 1,
                                 step  = 0.001),
                     sliderInput("shift",
                                 "Template shift:",
-                                min   = -10,
-                                max   = 10,
+                                min   = -1000,
+                                max   = 1000,
                                 value = 0,
-                                step  = 0.001)
+                                step  = 0.001),
+                    conditionalPanel("output$stats2",tableOutput("stats2"))
                 ),
                 mainPanel(
                     conditionalPanel("output$match.msg",textOutput("match.msg")),
