@@ -14,7 +14,7 @@ shinyUI(
                     selectInput("filepath","Choose input spectrum:",
                                 c("cB58_Lyman_break.fit (template)",
                                   list.files("data/",pattern=paste0("spec-(1353|5328|6064|5972|2557|",
-                                                                    "2261|5793|1568|6008|1437).*")))),
+                                                                    "2261|5793|1568|6008|1437|0390|2124|5324|5302).*")))),
                     sliderInput("thresh",
                                 "Filter threshold:",
                                 min   = 0,
@@ -58,7 +58,7 @@ shinyUI(
                     selectInput("filepath2","Choose spectrum for peak extraction",
                                 c("cB58_Lyman_break.fit (template)",
                                   list.files("data/",pattern=paste0("spec-(1353|5328|6064|5972|2557|",
-                                                                    "2261|5793|1568|6008|1437).*")))
+                                                                    "2261|5793|1568|6008|1437|0390|2124|5324|5302).*")))
                                 ),
                     sliderInput("span",
                                 "Set loess span",

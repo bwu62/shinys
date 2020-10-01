@@ -334,11 +334,11 @@ shinyServer(function(input, output, session) {
                                            values=c("a"="red","b"="black"),
                                            labels=c("Spectrum","Template")) +
                         theme(legend.justification = c(1, 0), legend.position = c(.98, .02)) ,
-                        # ggplot(data.frame(lapply(matchSpec.complete,
-                        #                          quantile,probs=breaks,na.rm=T))) +
-                        #     geom_point(aes(x=breaks,y=f.flt)) +
-                        #     geom_point(aes(x=breaks,y=tempflux*input$stretch+input$shift)) ,
-                        ggplot(peakSpec.complete,aes(x=loglam,y=f.flt-tempflux)) + geom_point() ,
+                        ggplot(data.frame(lapply(peakSpec.complete,
+                                                 quantile,probs=breaks,na.rm=T))) +
+                            geom_point(aes(x=breaks,y=f.flt)) + 
+                            geom_point(aes(x=breaks,y=tempflux*input$stretch+input$shift)) ,
+                        # ggplot(peakSpec.complete,aes(x=loglam,y=f.flt-tempflux)) + geom_point(size=.1) ,
                         ncol=2
                     )
                 })
@@ -351,7 +351,7 @@ shinyServer(function(input, output, session) {
                             c(G <- round(Gini(trans),3),
                               KS <- round(1-abs(ks.test(peakSpec.complete$f.flt,
                                                         peakSpec.complete$tempflux*input$stretch+input$shift)$statistic),3),
-                              G*KS
+                              round(G*KS,3)
                               )
                         ))
                     ),
