@@ -55,10 +55,11 @@ shinyUI(
                                           #diff{height:23vh !important;}
                                           #conv{height:23vh !important;}
                                           #trans{height:23vh !important;}")),
-                    selectInput("filepath3","Choose spectrum for peak extraction",
+                    selectInput("filepath2","Choose spectrum for peak extraction",
                                 c("cB58_Lyman_break.fit (template)",
                                   list.files("data/",pattern=paste0("spec-(1353|5328|6064|5972|2557|",
-                                                                    "2261|5793|1568|6008|1437).*")))),
+                                                                    "2261|5793|1568|6008|1437).*")))
+                                ),
                     sliderInput("span",
                                 "Set loess span",
                                 min   = 0.01,
@@ -77,42 +78,43 @@ shinyUI(
                     conditionalPanel("output$trans",plotOutput("trans"))
                 )
             )
-        )#,
-        # tabPanel(
-        #     "Matching",
-        #     sidebarLayout(
-        #         sidebarPanel(
-        #             tags$head(tags$style("#offset{height:30vh !important;}
-        #                                   #quants{height:35vh !important;}")),
-        #             selectInput("filepath2",
-        #                         "Choose spectrum for matching:",
-        #                         list.files("data/",pattern=paste0("spec-(1353|5328|6064|5972|2557|",
-        #                                                           "2261|5793|1568|6008|1437).*")),
-        #             sliderInput("offset",
-        #                         "Template offset:",
-        #                         min   = 0,
-        #                         max   = NA,
-        #                         value = 0,
-        #                         step  = 1),
-        #             sliderInput("stretch",
-        #                         "Template stretch:",
-        #                         min   = 0.001,
-        #                         max   = 10,
-        #                         value = 1,
-        #                         step  = 0.001),
-        #             sliderInput("shift",
-        #                         "Template shift:",
-        #                         min   = -10,
-        #                         max   = 10,
-        #                         value = 0,
-        #                         step  = 0.001)
-        #         ),
-        #         mainPanel(
-        #             conditionalPanel("output$match.msg",textOutput("match.msg")),
-        #             conditionalPanel("output$offset",plotOutput("offset")),
-        #             conditionalPanel("output$quants",plotOutput("quants"))
-        #         )
-        #     )
-        # )
+        ),
+        tabPanel(
+            "Scale matching",
+            sidebarLayout(
+                sidebarPanel(
+                    tags$head(tags$style("#conv2{height:28vh !important;}
+                                          #offset{height:28vh !important;}
+                                          #quants{height:30vh !important;}")),
+                    span("Showing match for file:",style="font-size:18px;font-weight:bold;"),
+                    span(textOutput("file"),style="font-size:14px"),
+                    HTML("<br>"),
+                    sliderInput("offset",
+                                "Template offset:",
+                                min   = 0,
+                                max   = NA,
+                                value = 0,
+                                step  = 1),
+                    sliderInput("stretch",
+                                "Template stretch:",
+                                min   = 0.001,
+                                max   = 10,
+                                value = 1,
+                                step  = 0.001),
+                    sliderInput("shift",
+                                "Template shift:",
+                                min   = -10,
+                                max   = 10,
+                                value = 0,
+                                step  = 0.001)
+                ),
+                mainPanel(
+                    conditionalPanel("output$match.msg",textOutput("match.msg")),
+                    conditionalPanel("output$conv2",plotOutput("conv2")),
+                    conditionalPanel("output$offset",plotOutput("offset")),
+                    conditionalPanel("output$quants",plotOutput("quants"))
+                )
+            )
+        )
     )
 )
