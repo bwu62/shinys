@@ -1,5 +1,5 @@
 library(FITSio)
-library(DescTools)
+# library(DescTools)    # used for Gini function
 
 # define lm-based rescaling algorithm
 lm.scale = function(source,target,breaks=seq(.15,.85,.05)){
@@ -19,6 +19,18 @@ low.pass = function(flux,thresh=200,strength=0.03,debug=FALSE){
   return(f.raw*ab[2]+ab[1])
 }
 
+# define normalized peak area function
+norm.peak.area = function(vector,index){
+  fallingOrZeroBound = function(vec){
+    return(which( c(F,diff(vec)>0) | vec==0 )[1]-1)
+  }
+  n = length(vector)
+  return(sum(vector[c(
+    max(1,index-fallingOrZeroBound(rev(vector[1:(index-1)])),na.rm=T):
+      min(n,index+fallingOrZeroBound(vector[(index+1):n]),na.rm=T)
+  )])/sum(vector))
+}
+
 # # create template to use
 # cb58                = readFrameFromFITS("cB58_Lyman_break.fit")
 # names(cb58)         = tolower(names(cb58))
@@ -29,6 +41,9 @@ low.pass = function(flux,thresh=200,strength=0.03,debug=FALSE){
 # load template and save # rows for use later
 load("cb58_template.Rdata")
 N = nrow(template)
+
+# fraction of max-conv-peak used as noise threshold
+C_thresh = 1/6
 
 # fraction of template used for scaling (to eliminate quasar spectra with broad high-wavelength emissions)
 N_frac   = floor(N*2/3)
@@ -47,11 +62,13 @@ ScoreSpec = function(spec.file){
   spec$flux.pass = low.pass(spec$flux)
   spec$flux.peak = loess.peak(spec$flux.pass)
   
-  # convolve with template, get offset of max, and transform for Gini later
+  # convolve with template, and get offset of max
   conv       = convolve(spec$flux.peak,template$flux.peak,type="filter")
   conv.max   = which.max(conv)
-  M          = conv[conv.max]
-  conv.trans = pmax(0,abs(pmax(conv,-M))-M/8)^2
+  
+  # transform to emphasize peaks, and find normalized area of peak at max-conv offset
+  conv.trans = pmax(0,abs(conv)-conv[conv.max]*C_thresh)^2
+  A          = norm.peak.area(conv.trans,conv.max)
   
   # subset spectrum at this offset
   newSpec = spec$flux.pass[conv.max:(conv.max+N-1)]
@@ -61,22 +78,38 @@ ScoreSpec = function(spec.file){
   coefs   = lm.scale(template$flux.pass[1:N_frac],newSpec[1:N_frac])
   newTemp = template$flux.pass*coefs[2]+coefs[1]
   
+  # find 1-Kolmogorov-Smirnov statistic to characterize quality of match
+  K = unname(1-ks.test(newSpec,newTemp)$statistic)
+  
   # generate scores and return
-  scores = c(
-    G <- Gini(conv.trans),
-    K <- unname(1-ks.test(newSpec,newTemp)$statistic),
-    
-    # 0.157 selected for N_frac=2/3 so 1353 (noisy cB58) not penalized for K
-    # for N_frac=3/4, use 0.168
-    G*pmin(1,K+(1-K_thresh))^2
-  )
-  names(scores) = c("G","K","Composite")
+  scores = c(A,K,A*pmin(1,K+(1-K_thresh))^2)
+  names(scores) = c("A","K","Composite")
   scores
 }
 
 files = list.files("data/",full.names=T)
 res = as.data.frame(t(sapply(files,ScoreSpec)))
 res = res[order(res$Composite,decreasing=T),]
+rownames(res) = gsub(".*/|(-\\d{5}|_temp).*","",rownames(res))
+res$names = factor(rownames(res),levels=rev(rownames(res)),ordered=T)
+res$types = "Other"
+res[grep("spec-1353|8oclockArc",res$names),]$types = "Lyman-break galaxy"
+res[grep("spec-(5302|5324|5328)",res$names),]$types = "Quasar"
+res[grep("spec-6064",res$names),]$types = "Carbon star"
+res$types = factor(res$types,ordered=T,
+                   levels=c("Lyman-break galaxy","Quasar","Carbon star","Other"))
+
+# visualize result
+library(ggplot)
+ggplot(res[1:30,],aes(x=names,y=Composite,fill=types)) + geom_col() + 
+  coord_flip() + labs(x=NULL,fill="Type of observation") + 
+  theme(legend.position=c(.98,.03),legend.justification=c(1,0)) + 
+  scale_y_continuous(limits=c(0,1),breaks=seq(0,1,.1),expand=c(0,0)) + 
+  scale_fill_manual(values=rev(c('black','#a1dab4','#41b6c4','#225ea8'))) + 
+  ylab(paste0("Normalized convolution peak area  \u00d7  scaled ",
+  "1-(K-S statistic of partially-quantile-matched spectra)")) + 
+  ggtitle("Top 30 spectra scores in sample of 100")
+ggsave("res30.png",width=9,height=6,dpi=600)
 
 # save result
-write.table(capture.output(res),file="res.txt",quote=F,row.names=F,col.names=F)
+write.table(capture.output(res),file="res2.txt",quote=F,row.names=F,col.names=F)
