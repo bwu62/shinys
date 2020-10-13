@@ -93,36 +93,32 @@ res = as.data.frame(t(sapply(files,ScoreSpec)))
 res = res[order(res$Combined,decreasing=T),]
 
 
-# ###
-# ### extra stuff for plotting/saving
-# ###
-# 
-# rownames(res) = gsub(".*/|(-\\d{5}|_temp).*","",rownames(res))
-# res$names = factor(rownames(res),levels=rev(rownames(res)),ordered=T)
-# res$types = "Other"
-# res[grep("spec-1353|8oclockArc",res$names),]$types = "Lyman-break galaxy"
-# res[grep("spec-(5302|5324|5328)",res$names),]$types = "Quasar"
-# res[grep("spec-6064",res$names),]$types = "Carbon star"
-# res$types = factor(res$types,ordered=T,
-#                    levels=c("Lyman-break galaxy","Quasar","Carbon star","Other"))
-# 
-# library(ggplot2)
-# ggplot(res[1:25,],aes(x=names,y=Combined,fill=types)) + geom_col() +
-#   coord_flip() + labs(x=NULL,fill="Type of observation") +
-#   theme(legend.position=c(.98,.03),legend.justification=c(1,0),
-<<<<<<< HEAD
-#         plot.margin=unit(c(6,10,6,6),"pt"),axis.title.x=element_text(size=10,margin=margin(t=6))) +
-=======
-#         plot.margin=unit(c(6,10,6,6),"pt"),axis.title.x=element_text(margin=margin(t=6))) +
->>>>>>> 41f4ca9dc6efb67682cc92f1e4a3dc439857aa06
-#   scale_y_continuous(limits=c(0,1),breaks=seq(0,1,.1),labels=c("0",seq(.1,.9,.1),"1"),expand=c(0,0)) +
-#   scale_fill_manual(values=rev(c('black','#a1dab4','#41b6c4','#225ea8'))) +
-#   ylab(paste0("Normalized convolution peak area \u00a0\u00d7\u00a0 scaled ",
-#   "1\u2013(K-S statistic w/\u2009partial quantile-matching)")) +
-#   ggtitle("Top 25 spectra scores in sample of 100")
-# 
-# #ggsave("top25.png",width=7.7,height=5.5,dpi=450)
-# ggsave("top25.svg",width=7.7,height=5.5)
-# 
-# write.table(capture.output(print(res[,-which(names(res)=="names")],digits=3)),
-#             file="res.txt",quote=F,row.names=F,col.names=F)
+###
+### extra stuff for plotting/saving
+###
+
+rownames(res) = gsub(".*/|(-\\d{5}|_temp).*","",rownames(res))
+res$names = factor(rownames(res),levels=rev(rownames(res)),ordered=T)
+res$types = "Other"
+res[grep("spec-1353|8oclockArc",res$names),]$types = "Lyman-break galaxy"
+res[grep("spec-(5302|5324|5328)",res$names),]$types = "Quasar"
+res[grep("spec-6064",res$names),]$types = "Carbon star"
+res$types = factor(res$types,ordered=T,
+                   levels=c("Lyman-break galaxy","Quasar","Carbon star","Other"))
+
+library(ggplot2)
+ggplot(res[1:25,],aes(x=names,y=Combined,fill=types)) + geom_col() +
+  coord_flip() + labs(x=NULL,fill="Type of observation") +
+  theme(legend.position=c(.98,.03),legend.justification=c(1,0),
+        plot.margin=unit(c(6,10,6,6),"pt"),axis.title.x=element_text(size=10,margin=margin(t=6))) +
+  scale_y_continuous(limits=c(0,1),breaks=seq(0,1,.1),labels=c("0",seq(.1,.9,.1),"1"),expand=c(0,0)) +
+  scale_fill_manual(values=rev(c('black','#a1dab4','#41b6c4','#225ea8'))) +
+  ylab(paste0("Normalized convolution peak area \u00a0\u00d7\u00a0 scaled ",
+  "1\u2013(K-S statistic w/\u2009partial quantile-matching)")) +
+  ggtitle("Top 25 spectra scores in sample of 100")
+
+#ggsave("top25.png",width=7.7,height=5.5,dpi=450)
+ggsave("top25.svg",width=7.7,height=5.5)
+
+write.table(capture.output(print(res[,-which(names(res)=="names")],digits=3)),
+            file="res.txt",quote=F,row.names=F,col.names=F)
