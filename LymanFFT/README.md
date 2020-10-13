@@ -13,7 +13,7 @@
 
 For detailed results, see output file `res.txt`. Below is plot of top 25 scoring spectra.
 
-![Plot of top 25 scoring spectra](top25.svg)
+![Plot of top 25 scoring spectra](https://raw.githubusercontent.com/bwu62/shinys/e5d4f633b2b0c902b368ef9bcb512d08b90eb2aa/LymanFFT/top25.svg)
 
 ### To do next
 
