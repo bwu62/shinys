@@ -68,7 +68,7 @@ ScoreSpec = function(spec.file){
   
   # transform to emphasize peaks, and find normalized area of peak at max-conv offset
   conv.trans = pmax(0,abs(conv)-conv[conv.max]*C_thresh)^2
-  A          = norm.peak.area(conv.trans,conv.max)
+  Area.peak  = norm.peak.area(conv.trans,conv.max)
   
   # subset spectrum at this offset
   newSpec = spec$flux.pass[conv.max:(conv.max+N-1)]
@@ -78,38 +78,45 @@ ScoreSpec = function(spec.file){
   coefs   = lm.scale(template$flux.pass[1:N_frac],newSpec[1:N_frac])
   newTemp = template$flux.pass*coefs[2]+coefs[1]
   
-  # find 1-Kolmogorov-Smirnov statistic to characterize quality of match
-  K = unname(1-ks.test(newSpec,newTemp)$statistic)
+  # compute rescaled Kolmogorov-Smirnov statistics to characterize quality of match
+  KS.raw = unname(ks.test(newSpec,newTemp)$statistic)
+  KS.trans = pmin(1,1-KS.raw+(1-K_thresh))^2
   
   # generate scores and return
-  scores = c(A,K,A*pmin(1,K+(1-K_thresh))^2)
-  names(scores) = c("A","K","Composite")
+  scores = c(Area.peak,KS.raw,KS.trans,Area.peak*KS.trans)
+  names(scores) = c("Area.peak","KS.raw","KS.trans","Combined")
   scores
 }
 
 files = list.files("data/",full.names=T)
 res = as.data.frame(t(sapply(files,ScoreSpec)))
-res = res[order(res$Composite,decreasing=T),]
-rownames(res) = gsub(".*/|(-\\d{5}|_temp).*","",rownames(res))
-res$names = factor(rownames(res),levels=rev(rownames(res)),ordered=T)
-res$types = "Other"
-res[grep("spec-1353|8oclockArc",res$names),]$types = "Lyman-break galaxy"
-res[grep("spec-(5302|5324|5328)",res$names),]$types = "Quasar"
-res[grep("spec-6064",res$names),]$types = "Carbon star"
-res$types = factor(res$types,ordered=T,
-                   levels=c("Lyman-break galaxy","Quasar","Carbon star","Other"))
+res = res[order(res$Combined,decreasing=T),]
 
-# visualize result
-library(ggplot)
-ggplot(res[1:30,],aes(x=names,y=Composite,fill=types)) + geom_col() + 
-  coord_flip() + labs(x=NULL,fill="Type of observation") + 
-  theme(legend.position=c(.98,.03),legend.justification=c(1,0)) + 
-  scale_y_continuous(limits=c(0,1),breaks=seq(0,1,.1),expand=c(0,0)) + 
-  scale_fill_manual(values=rev(c('black','#a1dab4','#41b6c4','#225ea8'))) + 
-  ylab(paste0("Normalized convolution peak area  \u00d7  scaled ",
-  "1-(K-S statistic of partially-quantile-matched spectra)")) + 
-  ggtitle("Top 30 spectra scores in sample of 100")
-ggsave("res30.png",width=9,height=6,dpi=600)
 
-# save result
-write.table(capture.output(res),file="res2.txt",quote=F,row.names=F,col.names=F)
+# ###
+# ### extra stuff for plotting/saving
+# ###
+# 
+# rownames(res) = gsub(".*/|(-\\d{5}|_temp).*","",rownames(res))
+# res$names = factor(rownames(res),levels=rev(rownames(res)),ordered=T)
+# res$types = "Other"
+# res[grep("spec-1353|8oclockArc",res$names),]$types = "Lyman-break galaxy"
+# res[grep("spec-(5302|5324|5328)",res$names),]$types = "Quasar"
+# res[grep("spec-6064",res$names),]$types = "Carbon star"
+# res$types = factor(res$types,ordered=T,
+#                    levels=c("Lyman-break galaxy","Quasar","Carbon star","Other"))
+# 
+# library(ggplot2)
+# ggplot(res[1:25,],aes(x=names,y=Combined,fill=types)) + geom_col() +
+#   coord_flip() + labs(x=NULL,fill="Type of observation") +
+#   theme(legend.position=c(.98,.03),legend.justification=c(1,0),
+#         plot.margin=unit(c(6,10,6,6),"pt"),axis.title.x=element_text(margin=margin(t=6))) +
+#   scale_y_continuous(limits=c(0,1),breaks=seq(0,1,.1),labels=c("0",seq(.1,.9,.1),"1"),expand=c(0,0)) +
+#   scale_fill_manual(values=rev(c('black','#a1dab4','#41b6c4','#225ea8'))) +
+#   ylab(paste0("Normalized convolution peak area  \u00d7  scaled ",
+#   "1-(K-S statistic of partially-quantile-matched spectra)")) +
+#   ggtitle("Top 25 spectra scores in sample of 100")
+# ggsave("top25.png",width=8.5,height=5.5,dpi=450)
+# 
+# write.table(capture.output(print(res[,-which(names(res)=="names")],digits=3)),
+#             file="res.txt",quote=F,row.names=F,col.names=F)
