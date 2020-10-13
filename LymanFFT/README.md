@@ -13,7 +13,7 @@
 
 For detailed results, see output file `res.txt`. Below is plot of top 25 scoring spectra.
 
-![Plot of top 25 scoring spectra](top25.png)
+![Plot of top 25 scoring spectra](top25.svg)
 
 ### To do next
 
