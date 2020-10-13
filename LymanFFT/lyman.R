@@ -114,7 +114,7 @@ ggplot(res[1:25,],aes(x=names,y=Combined,fill=types)) + geom_col() +
   scale_y_continuous(limits=c(0,1),breaks=seq(0,1,.1),labels=c("0",seq(.1,.9,.1),"1"),expand=c(0,0)) +
   scale_fill_manual(values=rev(c('black','#a1dab4','#41b6c4','#225ea8'))) +
   ylab(paste0("Normalized convolution peak area \u00a0\u00d7\u00a0 scaled ",
-  "1\u2013(K-S statistic w/\u2009partial quantile-matching)")) +
+  "1\u2013(K-S statistic w/ partial quantile-matching)")) +
   ggtitle("Top 25 spectra scores in sample of 100")
 
 #ggsave("top25.png",width=7.7,height=5.5,dpi=450)
