@@ -110,7 +110,11 @@ res = res[order(res$Combined,decreasing=T),]
 # ggplot(res[1:25,],aes(x=names,y=Combined,fill=types)) + geom_col() +
 #   coord_flip() + labs(x=NULL,fill="Type of observation") +
 #   theme(legend.position=c(.98,.03),legend.justification=c(1,0),
+<<<<<<< HEAD
 #         plot.margin=unit(c(6,10,6,6),"pt"),axis.title.x=element_text(size=10,margin=margin(t=6))) +
+=======
+#         plot.margin=unit(c(6,10,6,6),"pt"),axis.title.x=element_text(margin=margin(t=6))) +
+>>>>>>> 41f4ca9dc6efb67682cc92f1e4a3dc439857aa06
 #   scale_y_continuous(limits=c(0,1),breaks=seq(0,1,.1),labels=c("0",seq(.1,.9,.1),"1"),expand=c(0,0)) +
 #   scale_fill_manual(values=rev(c('black','#a1dab4','#41b6c4','#225ea8'))) +
 #   ylab(paste0("Normalized convolution peak area \u00a0\u00d7\u00a0 scaled ",
