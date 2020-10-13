@@ -13,8 +13,8 @@ shinyUI(
                                           #noise{height:23vh !important;margin-top:0vh !important;}")),
                     selectInput("filepath","Choose input spectrum:",
                                 c("cB58_Lyman_break.fit (template)",
-                                  list.files("data/",pattern=paste0("spec-(1353|5328|6064|5972|2557|2261|5793|",
-                                                                    "1568|6008|1437|0390|2124|5324|5302|6184).*")))),
+                                  list.files("data/",pattern=paste0("shapley.*|spec-(1353|5328|6064|5972|2557|2261|5793|",
+                                                                    "1568|6008|1437|0390|2124|5324|530.|6184|7258|3808|6439|7257|5454).*")))),
                     sliderInput("thresh",
                                 "Filter threshold:",
                                 min   = 0,
@@ -57,9 +57,9 @@ shinyUI(
                                           #trans{height:23vh !important;}")),
                     selectInput("filepath2","Choose spectrum for peak extraction",
                                 c("cB58_Lyman_break.fit (template)",
-                                  list.files("data/",pattern=paste0("spec-(1353|5328|6064|5972|2557|2261|5793|",
-                                                                    "1568|6008|1437|0390|2124|5324|5302|6184).*")))
-                                ),
+                                  list.files("data/",pattern=paste0("shapley.*|spec-(1353|5328|6064|5972|2557|2261|5793|",
+                                                                    "1568|6008|1437|0390|2124|5324|530.|6184|7258|3808|6439|7257|5454).*")))
+                    ),
                     sliderInput("span",
                                 "Set loess span",
                                 min   = 0.01,

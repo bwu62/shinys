@@ -22,8 +22,7 @@ shinyServer(function(input, output, session) {
     maxfrac   = reactiveVal(NA)
     
     # define lm-based rescaling algorithm
-    lm.scale = function(source,target){
-        breaks = seq(.15,.85,.05)
+    lm.scale = function(source,target,breaks=seq(.15,.85,.05)){
         return(unname(coef(lm(quantile(target,breaks,na.rm=T)~quantile(source,breaks,na.rm=T)))))
     }
     
@@ -217,8 +216,8 @@ shinyServer(function(input, output, session) {
                 idx = 1:(nrow(peakSpec)-nrow(template)+1),
                 raw = convolve(peakSpec$f.diff,template$f.diff,type="filter")
             )
-            maxfrac(1/8)
-            conv$trans = with(conv,pmax(0,abs(raw)-max(raw)*maxfrac())^2)
+            maxfrac(1/6)
+            conv$trans = with(conv,pmax(0,abs(pmax(raw,-max(raw)))-max(raw)*maxfrac())^2)
             
             spectrum2(peakSpec)
             convolved(conv)
@@ -250,7 +249,7 @@ shinyServer(function(input, output, session) {
                     data.frame(
                         vars = c("Index of max:","Raw Gini index:","Transformed Gini:"),
                         vals = with(conv,as.character(
-                            c(which.max(trans),round(Gini(abs(raw)),3),round(Gini(trans),3))
+                            c(which.max(raw),round(Gini(abs(raw)),3),round(Gini(trans),3))
                         ))
                     ),
                     spacing="xs",align="l",colnames=FALSE
@@ -299,7 +298,7 @@ shinyServer(function(input, output, session) {
                 N = nrow(peakSpec)-nrow(template)
                 updateSliderInput(session,"offset",max=N)
                 peakSpec$tempflux = c(rep(NA,input$offset),template$flux,rep(NA,N-input$offset))
-
+                
                 peakSpec.complete = peakSpec[complete.cases(peakSpec),]
                 
                 if(initSpec()){
@@ -308,40 +307,44 @@ shinyServer(function(input, output, session) {
                 }
                 
                 if(initAB()){
-                    ab = with(peakSpec.complete,lm.scale(tempflux,f.flt))
+                    ab = with(peakSpec.complete[1:floor(nrow(peakSpec.complete)*2/3),],lm.scale(tempflux,f.flt))
                     updateSliderInput(session,"stretch",value=ab[2])
                     updateSliderInput(session,"shift",value=ab[1])
                     initAB(FALSE)
                 }
-
+                
                 output$offset = renderPlot({
                     ggplot(peakSpec,aes(x=loglam)) +
                         geom_line(aes(y=f.flt,color="a")) +
                         geom_line(aes(y=tempflux*input$stretch+input$shift,color="b")) +
+                        geom_vline(aes(xintercept=peakSpec.complete[floor(nrow(peakSpec.complete)*2/3),]$loglam),
+                                   color="red",size=1,linetype=2) + 
                         scale_color_manual("Legend",
                                            values=c("a"="red","b"="black"),
                                            labels=c("Spectrum","Template")) +
                         theme(legend.justification = c(1, 1), legend.position = c(.98, .98))
                 })
-
+                
                 output$quants = renderPlot({
                     breaks = seq(.15,.85,.05)
                     grid.arrange(
                         ggplot(peakSpec.complete) +
                             stat_ecdf(aes(f.flt,color="a")) +
-                        stat_ecdf(aes(tempflux*input$stretch+input$shift,color="b"))  +
-                        scale_color_manual("Legend",
-                                           values=c("a"="red","b"="black"),
-                                           labels=c("Spectrum","Template")) +
-                        theme(legend.justification = c(1, 0), legend.position = c(.98, .02)) ,
+                            stat_ecdf(aes(tempflux*input$stretch+input$shift,color="b"))  +
+                            scale_color_manual("Legend",
+                                               values=c("a"="red","b"="black"),
+                                               labels=c("Spectrum","Template")) +
+                            theme(legend.justification = c(1, 0), legend.position = c(.98, .02)) ,
                         ggplot(data.frame(lapply(peakSpec.complete,
                                                  quantile,probs=breaks,na.rm=T))) +
                             geom_point(aes(x=breaks,y=f.flt)) + 
                             geom_point(aes(x=breaks,y=tempflux*input$stretch+input$shift)) ,
-                        # ggplot(peakSpec.complete,aes(x=loglam,y=f.flt-tempflux)) + geom_point(size=.1) ,
-                        ncol=2
+                        ggplot(peakSpec.complete,aes(x=loglam,y=f.flt-tempflux)) + geom_point(size=.1) + 
+                            geom_smooth(method="lm",se=F) + geom_hline(aes(yintercept=mean(f.flt-tempflux))) ,
+                        ncol=3
                     )
                 })
+                
                 
                 
                 output$stats2 = renderTable(
@@ -352,7 +355,8 @@ shinyServer(function(input, output, session) {
                               KS <- round(1-abs(ks.test(peakSpec.complete$f.flt,
                                                         peakSpec.complete$tempflux*input$stretch+input$shift)$statistic),3),
                               round(G*KS,3)
-                              )
+                              
+                            )
                         ))
                     ),
                     spacing="xs",align="l",colnames=FALSE
