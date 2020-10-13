@@ -72,12 +72,11 @@ ScoreSpec = function(spec.file){
   # subset spectrum at this offset
   newSpec = spec$flux.pass[conv.max:(conv.max+N-1)]
   
-  # rescale fromt 2/3 of template to spectrum subset
-  # (this attempts to eliminate quasar spectra with broad high-wavelength emissions)
+  # rescale left 2/3 of template to spectrum subset
   coefs   = lm.scale(template$flux.pass[1:N_frac],newSpec[1:N_frac])
   newTemp = template$flux.pass*coefs[2]+coefs[1]
   
-  # compute rescaled Kolmogorov-Smirnov statistics to characterize quality of match
+  # compute rescaled Kolmogorov-Smirnov statistic to characterize quality of match
   KS.raw = unname(ks.test(newSpec,newTemp)$statistic)
   KS.trans = pmin(1,1-KS.raw+(1-K_thresh))^2
   
