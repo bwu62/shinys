@@ -2,12 +2,12 @@
 
 ### Overview of method
 
- 1. Low-pass filter via Fast Fourier Transform used to smooth spectra
- 1. Convolution with template, used to:
+1. Low-pass filter via Fast Fourier Transform used to smooth spectra
+1. Convolution with template, used to:
    1. correct for red-shift (horizontal translation of log-wavelength)
    1. compute normalized area-under-peak to assess quality-of-match
- 1. Partial-quantile rescaling to match flux of spectra at computed red-shift
- 1. (Rescaled) Kolmogorov-Smirnov statistic used as second criterion for quality-of-match
+1. Partial-quantile rescaling to match flux of spectra at computed red-shift
+1. (Rescaled) Kolmogorov-Smirnov statistic used as second criterion for quality-of-match
 
 ### Results
 
