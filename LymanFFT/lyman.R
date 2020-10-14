@@ -44,11 +44,14 @@ N = nrow(template)
 # fraction of max-conv-peak used as noise threshold
 C_thresh = 1/6
 
-# fraction of template used for scaling (to eliminate quasar spectra with broad high-wavelength emissions)
+# fraction of template used for scaling (to eliminate quasars with broad high-wavelength emissions)
 N_frac   = floor(N*2/3)
 
 # K_thresh is K-stat of 1353 (noisy cB58); above this, do not penalize
-K_thresh = 0.8326
+K_thresh = 0.1673544246
+
+# define K-stat rescaling function
+K_scale = function(x){1-pmin(pmax(x-K_thresh,0)/(0.8-K_thresh),1)}
 
 ScoreSpec = function(spec.file){
   
@@ -76,11 +79,11 @@ ScoreSpec = function(spec.file){
   coefs   = lm.scale(template$flux.pass[1:N_frac],newSpec[1:N_frac])
   newTemp = template$flux.pass*coefs[2]+coefs[1]
   
-  # compute rescaled Kolmogorov-Smirnov statistic to characterize quality of match
+  # compute raw and rescaled Kolmogorov-Smirnov statistics
   KS.raw = unname(ks.test(newSpec,newTemp)$statistic)
-  KS.trans = pmin(1,1-KS.raw+(1-K_thresh))^2
+  KS.trans = K_scale(KS.raw)
   
-  # generate scores and return
+  # combine scores and return
   scores = c(Area.peak,KS.raw,KS.trans,Area.peak*KS.trans)
   names(scores) = c("Area.peak","KS.raw","KS.trans","Combined")
   scores
