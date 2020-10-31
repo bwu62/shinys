@@ -103,26 +103,30 @@ ScoreSpec = function(spec.file){
     # combine scores and return
     scores[1:4] = c(Area.peak,KS.raw,KS.trans,Area.peak*KS.trans)
     
-    # define y-offset for plotting both together
-    y.off = 5*IQR(newSpec)
-    
-    # get spec name
-    spec.name = gsub(".*/|\\.fits?","",sub("^.*(spec[-0-9]*).*$","\\1",spec.file))
-    
-    # create file for plot output
-    pdf(file=paste0("plots/",spec.name,".pdf"),width=5,height=4)
-    
-    # make basic plot of output
-    par(cex=.6,las=1)
-    plot(1:N,newSpec,type='l',col='black',lwd=1,ylim=c(min(newTemp)-y.off,max(newSpec)),
-         ylab="Rescaled Flux (template offset for legibility)",xlab="Wavelength index",
-         main=sprintf("%s  (A/K/C scores: %.2f %.2f %.4f)",spec.name,scores[1],scores[3],scores[4]))
-    lines(1:N,newTemp-y.off*.9,type='l',lwd=1,col='blue')
-    legend(x=N,y=min(newTemp)-y.off,legend=c("Spectrum","Template"),
-           col=c("black","blue"),lty=1,lwd=2,cex=.8,xjust=.9,yjust=.1)
-    
-    # close plot device
-    dev.off()
+    if(scores[4] >= 0.7){
+      
+      # define y-offset for plotting both together
+      y.off = 5*IQR(newSpec)
+      
+      # get spec name
+      spec.name = gsub(".*/|\\.fits?","",sub("^.*(spec[-0-9]*).*$","\\1",spec.file))
+      
+      # create file for plot output
+      pdf(file=sprintf("plots/%.6f_%s.pdf",round(scores[4],6),spec.name),width=5,height=4)
+      
+      # make basic plot of output
+      par(cex=.6,las=1)
+      plot(1:N,newSpec,type='l',col='black',lwd=1,ylim=c(min(newTemp)-y.off,max(newSpec)),
+           ylab="Rescaled Flux (template offset for legibility)",xlab="Wavelength index",
+           main=sprintf("%s  (offset: %d; A/K/C scores: %.2f, %.2f, %.4f)",spec.name,conv.max,scores[1],scores[3],scores[4]))
+      lines(1:N,newTemp-y.off*.9,type='l',lwd=1,col='blue')
+      legend(x=N,y=min(newTemp)-y.off,legend=c("Spectrum","Template"),
+             col=c("black","blue"),lty=1,lwd=2,cex=.8,xjust=.9,yjust=.1)
+      
+      # close plot device
+      dev.off()
+      
+    }
     
   }, error = function(e) {
     write(toString(e), stderr())
