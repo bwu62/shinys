@@ -1,4 +1,4 @@
 *.Rdata
 !cb58_template.Rdata
-
 *.bat
+plots/
