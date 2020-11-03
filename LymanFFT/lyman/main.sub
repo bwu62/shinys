@@ -1,0 +1,25 @@
+universe = vanilla
+
+initialdir = $Ff(./output)
+specnum    = $Fn(filename)
+
+proc = $INT(Process,%04d)
+
+log    = $(specnum)_$(Cluster)-$(proc).log
+output = $(specnum)_$(Cluster)-$(proc).out
+error  = $(specnum)_$(Cluster)-$(proc).err
+
+requirements = (OpSysMajorVer =?= 7)
+
+executable = startR.sh
+
+transfer_input_files = ../fitsio.tar.gz, ../lyman_sub.R, ../cb58_template.Rdata, $(filename), http://proxy.chtc.wisc.edu/SQUID/chtc/R402.tar.gz
+should_transfer_files = YES
+when_to_transfer_output = ON_EXIT
+
+request_cpus = 1
+request_memory = 1GB
+request_disk = 700MB
+materialize_max_idle = 1000
+
+queue filename matching /home/groups/STAT605/boss/tgz/*
