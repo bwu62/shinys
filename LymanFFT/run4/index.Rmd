@@ -1,4 +1,4 @@
-  ---
+---
 title: "Lyman-break galaxy detection"
 author: "Bi Cheng Wu"
 date: "`r format(Sys.Date(),'%B %e, %Y')`"
