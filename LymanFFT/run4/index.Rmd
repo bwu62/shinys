@@ -39,7 +39,7 @@ td:last-child {
 }
 </style>
 
-## Link
+## Source code
 
 [Github project page](https://github.com/bwu62/shinys/tree/master/LymanFFT).
 
