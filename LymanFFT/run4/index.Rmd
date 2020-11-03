@@ -1,4 +1,4 @@
----
+  ---
 title: "Lyman-break galaxy detection"
 author: "Bi Cheng Wu"
 date: "`r format(Sys.Date(),'%B %e, %Y')`"
@@ -84,7 +84,7 @@ Steps 5-6 above are kind of a hack. If we had a high-quality quasar template to 
 
 ## Results
 
-A table of top 1000 results sorted by ranked by composite score can be [viewed here](res2.txt).
+A table of top 500 results sorted by ranked by composite score can be [viewed here](res2.txt).
 
 Plots of some of the best matches are shown below. Most info in the title/label are for my debugging purposes. Notably, the offset index (red-shift correction) and $A_{\text{peak}}$, $K_{\text{trans}}$, and $C$ are shown in the title. The template was shifted down from the spectra for legibility.
 

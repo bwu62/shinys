@@ -19,7 +19,7 @@
 
 ### Actual dataset of 2.459 million spectra:
 
-[Link to results summary page](file:///C:/Users/bi/Desktop/run4/index.html)
+[Link to results summary page](http://pages.stat.wisc.edu/~bwu62/run4/)
 
 ## To do next
 
