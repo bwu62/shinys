@@ -46,7 +46,7 @@ td:last-child {
 
 ## Data
 
-We aim to detect Lyman-break galaxies (LBGs) by comparing spectra against a known template. In particular, good candidates should:
+From ~2.5 million spectra, we aim to detect Lyman-break galaxies (LBGs) by comparing against a known template. In particular, good candidates should:
 
 1. Match key absorption troughs (nearly) exactly.
 1. Not exhibit signs of broad higher-wavelength emissions (likely to be quasars).
