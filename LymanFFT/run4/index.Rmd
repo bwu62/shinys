@@ -1,0 +1,146 @@
+---
+title: "Lyman-break galaxy detection"
+author: "Bi Cheng Wu"
+date: "`r format(Sys.Date(),'%B %e, %Y')`"
+output: html_document
+---
+
+<style>
+td {
+  vertical-align: middle !important;
+  font-size: 16pt;
+}
+.header {
+  font-size: x-large;
+}
+table {
+  border-spacing:100px !important;
+}
+.table>tbody>tr>td {
+border-top: 1px solid #404040 !important;
+}
+.table>thead>tr>th {
+    border-bottom: 2px solid #808080 !important;
+}
+p,li {
+  font-size: 14pt !important;
+}
+h2:not(.title){
+  margin-top:35px;
+}
+ol {
+  margin-bottom:20px;
+}
+table{
+  margin-top:20px;
+}
+td:last-child {
+    padding-left:20px !important;
+}
+</style>
+
+## Link
+
+[Github project page](https://github.com/bwu62/shinys/tree/master/LymanFFT).
+
+## Data
+
+We aim to detect Lyman-break galaxies (LBGs) by comparing spectra against a known template. In particular, good candidates should:
+
+1. Match key absorption troughs (nearly) exactly.
+1. Not exhibit signs of broad higher-wavelength emissions (likely to be quasars).
+
+The first requirement is easier than the second, since we are provided a high-quality LBG template to compare with. If a similarly high-quality template were to be provided for quasars, **it should be possible to substantially improve these results**.
+
+## Considerations
+
+> *The method started simple but grew more complex over time with testing.*
+
+The main consideration in designing the method was robustness. Every step in the process should be as robust as possible against:
+
+1. Noise
+1. Arbitrary vertical & horizontal shifting
+1. Arbitrary vertical scaling
+
+Carefully selected smoothing methods were effective at reducing anticipated noise, convolution matching of absorption troughs was effective at correcting for horizontal shifts, and regressing on quantiles was effective at correcting vertical shifting/scaling. More details are provided below.
+
+## Method
+
+The process was carefully constructed and tuned with the help of several R Shiny debugging apps I made (see repo for details). Below is a more in-depth overview:
+
+1. The spectrum is first trimmed at both ends to remove [Gibb's artifacts](https://en.wikipedia.org/wiki/Gibbs_phenomenon).
+1. Then, it's *gently* [low-pass](https://en.wikipedia.org/wiki/Low-pass_filter) smoothed by truncating its [(fast) Fourier transform](https://en.wikipedia.org/wiki/Fast_Fourier_transform).
+1. Next, to emphasize absorption troughs, we took the difference between the spectrum and an *aggressively* [loess-smoothed](https://en.wikipedia.org/wiki/Local_regression) version of itself.
+1. This was then [convolved](https://en.wikipedia.org/wiki/Matched_filter) with a similarly trough-emphasized version of the template (cB58), which was used in two ways:
+   i. First, the index of the global maximum was recorded as the [red/blue-shift](https://en.wikipedia.org/wiki/Redshift) correction (this works because the wavelength is already in log-scale).
+   i. Then, the convolved result is transformed to reduce noise and emphasize potential matches. The normalized area under the index found above, called $A_{\text{peak}}$, is calculated and saved.
+1. Now, we slide our template to correct for red-shift and rescale by using simple linear regression (SLR) to match fixed quantiles in the first two-thirds of both spectra.
+   i. Note SLR is merely used to match points that be vertically shifted/scaled (thus, the quantiles don't even need to be linear).
+   i. The first two-thirds were used since it *kind of appears* (this needs better investigation!) that quasars may have more broad emissions to the side, so matching part of the spectrum may help distinguish these cases.
+1. Penultimately, we take the [Kolmogorov-Smirnov](https://en.wikipedia.org/wiki/Kolmogorov%E2%80%93Smirnov_test) difference statistic between the entirety of both spectra, and transform it into $K_{\text{trans}}$ to penalize (up to a point) spectra with higher statistic (i.e. larger difference) than a noisy version of our template.
+1. Lastly, we simply take the product $C=A_{\text{peak}}\cdot K_{\text{trans}}$ as our composite score. Note both $A_{\text{peak}},K_{\text{trans}}\in[0,1]$ with higher being better.
+
+Steps 5-6 above are kind of a hack. If we had a high-quality quasar template to match against, we may be able to replace it with more elegant code that also achieves higher specificity (this is only a conjecture).
+
+## Results
+
+A table of top 1000 results sorted by ranked by composite score can be [viewed here](res2.txt).
+
+Plots of some of the best matches are shown below. Most info in the title/label are for my debugging purposes. Notably, the offset index (red-shift correction) and $A_{\text{peak}}$, $K_{\text{trans}}$, and $C$ are shown in the title. The template was shifted down from the spectra for legibility.
+
+For each spectrum, the composite score is also shown on the side for convenience. Initially, I was going to give a (likely very poor) guess for each one what type of astronomical body it may be, but I ultimately decided against it since I really have no idea 🙃
+
+Here are the top 50 or so spectra (with a few visually ruled out). There seem to be quite a few potential quasars in here with broad emission bands CIV and CIII (some of which are quite visible).
+
+| &nbsp; | |
+| :---: | :--- |
+| [ ![](png/0.998173_spec-4773-55648-0532.png) ](png/0.998173_spec-4773-55648-0532.png) | Score:<br/>$0.998173$ |
+| [ ![](png/0.996457_spec-6495-56339-0338.png) ](png/0.996457_spec-6495-56339-0338.png) | Score:<br/>$0.996457$ |
+| [ ![](png/0.996200_spec-6746-56386-0120.png) ](png/0.996200_spec-6746-56386-0120.png) | Score:<br/>$0.996200$ |
+| [ ![](png/0.993031_spec-6967-56447-0063.png) ](png/0.993031_spec-6967-56447-0063.png) | Score:<br/>$0.993031$ |
+| [ ![](png/0.990401_spec-4200-55499-0316.png) ](png/0.990401_spec-4200-55499-0316.png) | Score:<br/>$0.990401$ |
+| [ ![](png/0.990346_spec-6689-56396-0037.png) ](png/0.990346_spec-6689-56396-0037.png) | Score:<br/>$0.990346$ |
+| [ ![](png/0.989884_spec-3679-55209-0232.png) ](png/0.989884_spec-3679-55209-0232.png) | Score:<br/>$0.989884$ |
+| [ ![](png/0.988500_spec-5805-56336-0756.png) ](png/0.988500_spec-5805-56336-0756.png) | Score:<br/>$0.988500$ |
+| [ ![](png/0.987187_spec-4226-55475-0663.png) ](png/0.987187_spec-4226-55475-0663.png) | Score:<br/>$0.987187$ |
+| [ ![](png/0.986188_spec-5447-55958-0904.png) ](png/0.986188_spec-5447-55958-0904.png) | Score:<br/>$0.986188$ |
+| [ ![](png/0.985287_spec-3793-55214-0542.png) ](png/0.985287_spec-3793-55214-0542.png) | Score:<br/>$0.985287$ |
+| [ ![](png/0.984728_spec-6313-56460-0402.png) ](png/0.984728_spec-6313-56460-0402.png) | Score:<br/>$0.984728$ |
+| [ ![](png/0.983821_spec-4742-55660-0608.png) ](png/0.983821_spec-4742-55660-0608.png) | Score:<br/>$0.983821$ |
+| [ ![](png/0.983571_spec-5973-56067-0166.png) ](png/0.983571_spec-5973-56067-0166.png) | Score:<br/>$0.983571$ |
+| [ ![](png/0.983414_spec-6452-56366-0270.png) ](png/0.983414_spec-6452-56366-0270.png) | Score:<br/>$0.983414$ |
+| [ ![](png/0.982770_spec-4444-55538-0900.png) ](png/0.982770_spec-4444-55538-0900.png) | Score:<br/>$0.982770$ |
+| [ ![](png/0.982456_spec-6032-56067-0742.png) ](png/0.982456_spec-6032-56067-0742.png) | Score:<br/>$0.982456$ |
+| [ ![](png/0.981456_spec-4977-56047-0468.png) ](png/0.981456_spec-4977-56047-0468.png) | Score:<br/>$0.981456$ |
+| [ ![](png/0.981149_spec-5995-56093-0563.png) ](png/0.981149_spec-5995-56093-0563.png) | Score:<br/>$0.981149$ |
+| [ ![](png/0.978160_spec-4238-55455-0010.png) ](png/0.978160_spec-4238-55455-0010.png) | Score:<br/>$0.978160$ |
+| [ ![](png/0.975860_spec-5411-55953-0760.png) ](png/0.975860_spec-5411-55953-0760.png) | Score:<br/>$0.975860$ |
+| [ ![](png/0.974586_spec-6720-56390-0594.png) ](png/0.974586_spec-6720-56390-0594.png) | Score:<br/>$0.974586$ |
+| [ ![](png/0.973305_spec-6713-56402-0294.png) ](png/0.973305_spec-6713-56402-0294.png) | Score:<br/>$0.973305$ |
+| [ ![](png/0.972581_spec-5001-55719-0400.png) ](png/0.972581_spec-5001-55719-0400.png) | Score:<br/>$0.972581$ |
+| [ ![](png/0.971594_spec-6113-56219-0624.png) ](png/0.971594_spec-6113-56219-0624.png) | Score:<br/>$0.971594$ |
+| [ ![](png/0.971582_spec-3771-55544-0718.png) ](png/0.971582_spec-3771-55544-0718.png) | Score:<br/>$0.971582$ |
+| [ ![](png/0.969833_spec-4783-55652-0180.png) ](png/0.969833_spec-4783-55652-0180.png) | Score:<br/>$0.969833$ |
+| [ ![](png/0.969629_spec-6702-56381-0194.png) ](png/0.969629_spec-6702-56381-0194.png) | Score:<br/>$0.969629$ |
+| [ ![](png/0.969139_spec-4855-55926-0123.png) ](png/0.969139_spec-4855-55926-0123.png) | Score:<br/>$0.969139$ |
+| [ ![](png/0.969034_spec-7297-57040-0048.png) ](png/0.969034_spec-7297-57040-0048.png) | Score:<br/>$0.969034$ |
+| [ ![](png/0.966476_spec-6973-56741-0898.png) ](png/0.966476_spec-6973-56741-0898.png) | Score:<br/>$0.966476$ |
+| [ ![](png/0.964608_spec-7319-56962-0099.png) ](png/0.964608_spec-7319-56962-0099.png) | Score:<br/>$0.964608$ |
+| [ ![](png/0.962382_spec-4856-55712-0528.png) ](png/0.962382_spec-4856-55712-0528.png) | Score:<br/>$0.962382$ |
+| [ ![](png/0.960429_spec-6184-56267-0854.png) ](png/0.960429_spec-6184-56267-0854.png) | Score:<br/>$0.960429$ |
+| [ ![](png/0.959924_spec-6137-56270-0238.png) ](png/0.959924_spec-6137-56270-0238.png) | Score:<br/>$0.959924$ |
+| [ ![](png/0.959898_spec-5731-56363-0960.png) ](png/0.959898_spec-5731-56363-0960.png) | Score:<br/>$0.959898$ |
+| [ ![](png/0.958947_spec-4375-55889-0334.png) ](png/0.958947_spec-4375-55889-0334.png) | Score:<br/>$0.958947$ |
+| [ ![](png/0.958364_spec-5014-55717-0021.png) ](png/0.958364_spec-5014-55717-0021.png) | Score:<br/>$0.958364$ |
+| [ ![](png/0.957592_spec-4864-55680-0360.png) ](png/0.957592_spec-4864-55680-0360.png) | Score:<br/>$0.957592$ |
+| [ ![](png/0.955886_spec-3687-55269-0080.png) ](png/0.955886_spec-3687-55269-0080.png) | Score:<br/>$0.955886$ |
+| [ ![](png/0.954140_spec-5285-55946-0974.png) ](png/0.954140_spec-5285-55946-0974.png) | Score:<br/>$0.954140$ |
+| [ ![](png/0.953548_spec-3804-55267-0434.png) ](png/0.953548_spec-3804-55267-0434.png) | Score:<br/>$0.953548$ |
+| [ ![](png/0.953100_spec-5289-55893-0607.png) ](png/0.953100_spec-5289-55893-0607.png) | Score:<br/>$0.953100$ |
+| [ ![](png/0.952959_spec-3935-55326-0192.png) ](png/0.952959_spec-3935-55326-0192.png) | Score:<br/>$0.952959$ |
+| [ ![](png/0.952637_spec-7053-56564-0460.png) ](png/0.952637_spec-7053-56564-0460.png) | Score:<br/>$0.952637$ |
+| [ ![](png/0.951155_spec-4559-55597-0844.png) ](png/0.951155_spec-4559-55597-0844.png) | Score:<br/>$0.951155$ |
+| [ ![](png/0.950995_spec-5367-55986-0670.png) ](png/0.950995_spec-5367-55986-0670.png) | Score:<br/>$0.950995$ |
+| [ ![](png/0.949865_spec-6687-56602-0376.png) ](png/0.949865_spec-6687-56602-0376.png) | Score:<br/>$0.949865$ |
+| [ ![](png/0.949348_spec-3941-55321-0038.png) ](png/0.949348_spec-3941-55321-0038.png) | Score:<br/>$0.949348$ |
+| [ ![](png/0.948499_spec-5694-56213-0320.png) ](png/0.948499_spec-5694-56213-0320.png) | Score:<br/>$0.948499$ |

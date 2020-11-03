@@ -3,3 +3,6 @@
 *.bat
 plots/
 convert_res.R
+run4/png/0.8*
+run4/debug.log
+run4/res.txt
