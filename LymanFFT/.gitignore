@@ -2,3 +2,4 @@
 !cb58_template.Rdata
 *.bat
 plots/
+convert_res.R
