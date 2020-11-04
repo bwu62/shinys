@@ -1,8 +1,5 @@
-library(shiny)
-library(ggplot2)
-library(FITSio)
-library(gridExtra)
-library(DescTools)
+if(!require(pacman)) install.packages("pacman")
+pacman::p_load(shiny,ggplot2,FITSio,gridExtra)
 
 # create server
 shinyServer(function(input, output, session) {
