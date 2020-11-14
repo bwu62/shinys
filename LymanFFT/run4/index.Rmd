@@ -55,15 +55,15 @@ The first requirement is easier than the second, since we are provided a high-qu
 
 ## Considerations
 
-> *The method started simple but grew more complex over time with testing.*
-
-The main consideration in designing the method was robustness. Every step in the process should be as robust as possible against:
+The **main consideration** in designing the method was **robustness**. Every step in the process should be as robust as possible against:
 
 1. Noise
 1. Arbitrary vertical & horizontal shifting
 1. Arbitrary vertical scaling
 
-Carefully selected smoothing methods were effective at reducing anticipated noise, convolution matching of absorption troughs was effective at correcting for horizontal shifts, and regressing on quantiles was effective at correcting vertical shifting/scaling. More details are provided below.
+Carefully selected smoothing methods were effective at reducing anticipated noise, convolution matching of absorption troughs was effective at correcting for horizontal shifts, and regressing on quantiles was effective at correcting vertical shifting/scaling.
+
+More details are provided below.
 
 ## Method
 
@@ -75,23 +75,25 @@ The process was carefully constructed and tuned with the help of several R Shiny
 1. This was then [convolved](https://en.wikipedia.org/wiki/Matched_filter) with a similarly trough-emphasized version of the template (cB58), which was used in two ways:
    i. First, the index of the global maximum was recorded as the [red/blue-shift](https://en.wikipedia.org/wiki/Redshift) correction (this works because the wavelength is already in log-scale).
    i. Then, the convolved result is transformed to reduce noise and emphasize potential matches. The normalized area under the index found above, called $A_{\text{peak}}$, is calculated and saved.
-1. Now, we slide our template to correct for red-shift and rescale by using simple linear regression (SLR) to match fixed quantiles in the first two-thirds of both spectra.
+1. Now, we slide our template to correct for red-shift, and rescale it by using simple linear regression (SLR) to match specific quantiles of a portion of the template with the target.
    i. Note SLR is merely used to match points that be vertically shifted/scaled (thus, the quantiles don't even need to be linear).
-   i. The first two-thirds were used since it *kind of appears* (this needs better investigation!) that quasars may have more broad emissions to the side, so matching part of the spectrum may help distinguish these cases.
-1. Penultimately, we take the [Kolmogorov-Smirnov](https://en.wikipedia.org/wiki/Kolmogorov%E2%80%93Smirnov_test) difference statistic between the entirety of both spectra, and transform it into $K_{\text{trans}}$ to penalize (up to a point) spectra with higher statistic (i.e. larger difference) than a noisy version of our template.
-1. Lastly, we simply take the product $C=A_{\text{peak}}\cdot K_{\text{trans}}$ as our composite score. Note both $A_{\text{peak}},K_{\text{trans}}\in[0,1]$ with higher being better.
+   i. Only part of the template (specifically the leftmost 2/3) was used since it *kind of appears* (this needs better investigation!) that quasars may have more broad emissions to the other (right) side. The hope is that this process would emphasize these differences and allow better differentiation of the two.
+1. Penultimately, we take the [Kolmogorov-Smirnov](https://en.wikipedia.org/wiki/Kolmogorov%E2%80%93Smirnov_test) difference statistic between both spectra (to attempt to detect the difference highlighed in the preivous step), and transform it into $K_{\text{trans}}$ to penalize up to a point those spectra with higher statistic (i.e. larger difference) than a noisy version of our template.
+1. Lastly, we take the product $C=A_{\text{peak}}\cdot K_{\text{trans}}$ as our composite score. Note both $A_{\text{peak}},K_{\text{trans}}\in[0,1]$ with higher being better.
 
-Steps 5-6 above are kind of a hack. If we had a high-quality quasar template to match against, we may be able to replace it with more elegant code that also achieves higher specificity (this is only a conjecture).
+Steps 5-6 above are kind of hacky. If we had a high-quality quasar template to match against, we may be able to replace it with more elegant code that also achieves higher specificity (this is only a conjecture).
+
+Though the method seems complex, it's very computationally efficient. Each target spectrum takes around $0.13\,\text{s}$ to run and requires $<1\,\text{GB}$ (which is recycled for the next iteration). Most of this time (72%) and memory (58%) is actually spent on simply reading in the target spectrum file.
+
+The 2.459 million spectra in the dataset were analyzed using [CHTC](https://chtc.cs.wisc.edu/). Using 2459 jobs (1000 spectra each), with each job running on 1 core with 1GB of memory and even less disk, we were able to reduce runtime of all jobs from $(2.459\!\times\!10^{6})\cdot(0.13\,\text{s})\approx89\text{hours}$ to about 3 hours real-time.
 
 ## Results
 
-A table of top 500 results sorted by ranked by composite score can be [viewed here](res2.txt).
+A table of top 500 results ranked by $C$ can be [viewed here](res2.txt).
 
-Plots of some of the best matches are shown below. Most info in the title/label are for my debugging purposes. Notably, the offset index (red-shift correction) and $A_{\text{peak}}$, $K_{\text{trans}}$, and $C$ are shown in the title. The template was shifted down from the spectra for legibility.
+Plots of some of the best matches are shown below. Most info in the title/label are for my debugging purposes. Notably, the offset index (red-shift correction); and $A_{\text{peak}}$, $K_{\text{trans}}$, and $C$ are shown in the title. The template was shifted down from the target spectra for ease of comparison.
 
-For each spectrum, the composite score is also shown on the side for convenience. Initially, I was going to give a (likely very poor) guess for each one what type of astronomical body it may be, but I ultimately decided against it since I really have no idea 🙃
-
-Here are the top 50 or so spectra (with a few visually ruled out). There seem to be quite a few potential quasars in here with broad emission bands CIV and CIII (some of which are quite visible).
+For each spectrum, the composite score is also shown on the side for convenience. Initially, I was going to give a (likely poor) guess for each one what type of astronomical body it may be, but I ultimately decided against it since I'm not an astronomer and would have very little confidence in my guesses 🙃 (there seem to be quite a few potential quasars in here with broad emission bands CIV and CIII).
 
 | &nbsp; | &nbsp; |
 | :---: | :--- |
