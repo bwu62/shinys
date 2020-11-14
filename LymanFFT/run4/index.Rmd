@@ -85,7 +85,7 @@ Steps 5-6 above are kind of hacky. If we had a high-quality quasar template to m
 
 Though the method seems complex, it's very computationally efficient. Each target spectrum takes around $0.13\,\text{s}$ to run and requires $<1\,\text{GB}$ (which is recycled for the next iteration). Most of this time (72%) and memory (58%) is actually spent on simply reading in the target spectrum file.
 
-The 2.459 million spectra in the dataset were analyzed using [CHTC](https://chtc.cs.wisc.edu/). Using 2459 jobs (1000 spectra each), with each job running on 1 core with 1GB of memory and even less disk, we were able to reduce runtime of all jobs from $(2.459\!\times\!10^{6})\cdot(0.13\,\text{s})\approx89\text{hours}$ to about 3 hours real-time.
+The 2.459 million spectra in the dataset were analyzed using [CHTC](https://chtc.cs.wisc.edu/). Using 2459 jobs (1000 spectra each), with each job running on 1 core with 1GB of memory and even less disk, we were able to reduce runtime of all jobs from $(2.459\!\times\!10^{6})\cdot(0.13\,\text{s})\approx89\,\text{hours}$ to about 3 hours real-time (including time spent in the queue waiting for an open execute node).
 
 ## Results
 
