@@ -12,7 +12,7 @@ loess.peak = function(y,span=0.2,flip=TRUE){
 }
 
 # define low.pass function
-low.pass = function(flux,thresh=200,strength=0.03,debug=FALSE){
+low.pass = function(flux,thresh=200,strength=0.03){
   f.raw = Re(fft(fft(flux)*exp(-exp(((1+strength)^2-1)*((1:length(flux))-thresh))),inverse=T))
   ab = lm.scale(f.raw,flux)
   return(f.raw*ab[2]+ab[1])
