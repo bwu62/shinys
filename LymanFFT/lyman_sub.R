@@ -99,7 +99,7 @@ ScoreSpec = function(spec.file){
       trim.right = 150
       
       # apply trims
-      spec = spec[trim.left:(nrow(spec)-trim.right+1),,drop=F]
+      spec = spec[trim.left:(orig_M-trim.right+1),,drop=F]
       
     },error=function(e){
       stop("skip")
