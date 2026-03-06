@@ -80,7 +80,7 @@ server <- function(input, output) {
       geom_hline(yintercept=input$slice+slice_width*c(-1,1),color=ifelse(-1==input$rtm,"darkgreen",NA)) + 
       geom_point(data = data %>% filter(abs(y-input$slice)<slice_width),aes(x,y),
                  color=ifelse(-1==input$rtm,"darkgreen",NA),size=.7) + 
-      geom_vline(xintercept = 1/r*input$slice,
+      geom_vline(xintercept = r*input$slice,
                  color=ifelse(-1==input$rtm,"darkgreen",NA),linetype="dotted",linewidth=1)
     
   })

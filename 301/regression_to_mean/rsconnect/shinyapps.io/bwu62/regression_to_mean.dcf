@@ -1,0 +1,12 @@
+name: regression_to_mean
+title: regression_to_mean
+username: bwu62
+account: bwu62
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 16827831
+bundleId: 11668861
+url: https://bwu62.shinyapps.io/regression_to_mean/
+version: 1
+asMultiple: FALSE
+asStatic: FALSE
